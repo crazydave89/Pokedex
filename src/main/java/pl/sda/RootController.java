@@ -1,16 +1,17 @@
 package pl.sda;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import pl.sda.Pokedex.PokedexController;
 import pl.sda.Pokedex.Pokemon;
 
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -37,9 +38,31 @@ public class RootController implements Initializable {
     private Label weakness;
     @FXML
     private Button goToPrevEvo;
+    @FXML
+    private Spinner<String> spinner;
+    @FXML
+    private Button findBySpinner;
 
     List<Pokemon> pokemonList = new PokedexController().readPokedex().getPokemon();
 
+    public ObservableList<String> makeObservableList(){
+        ObservableList<String> observableList= FXCollections.observableArrayList();
+        pokemonList.sort(Comparator.comparing(pokemon -> pokemon.getName()));
+        for (Pokemon pokemon : pokemonList) {
+            observableList.add(pokemon.getName());
+        }
+        return observableList;
+    }
+
+    public void pressSpinnerButton(){
+        for (Pokemon pokemon : pokemonList) {
+            if (pokemon.getName().equals(spinner.getValue())){
+                wprowadz.setText(String.valueOf(pokemon.getId()));
+                getPokemon();
+            }
+        }
+
+    }
 
     public List<Pokemon> getPokemonList(){
         List<Pokemon> pokemon = pokemonList.stream().filter(pokemon1 -> pokemon1.getId() == Integer.parseInt(wprowadz.getText())).collect(Collectors.toList());
@@ -92,5 +115,6 @@ public class RootController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    }
+        spinner.setValueFactory(new SpinnerValueFactory.ListSpinnerValueFactory<>(makeObservableList()));
+}
 }
